@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+psycopg2-binary
+pydantic
+pytest
+python-jose[cryptography]
+ipfshttpclient
+requests

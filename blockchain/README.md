@@ -102,7 +102,7 @@ The console will output the live contract addresses for all 7 deployed smart con
 
 ---
 
-## 8. Team Presentation (Live Demo)
+## 8. Demo Presentation 
 
 To present a live demonstration of the core architecture to your team, we have included an end-to-end integration script (`scripts/demo.js`).
 

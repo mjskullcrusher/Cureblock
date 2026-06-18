@@ -8,3 +8,5 @@ pytest
 python-jose[cryptography]
 ipfshttpclient
 requests
+web3
+python-dotenv

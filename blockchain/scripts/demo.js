@@ -50,7 +50,7 @@ async function main() {
     try {
         cid = await uploadToPinata(mockData);
     } catch (error) {
-         console.error("\n❌ IPFS Upload Failed!");
+         console.error("\n IPFS Upload Failed!");
          console.error("Please ensure your PINATA_API_KEY and PINATA_SECRET in the .env file are valid.");
          console.error(error.message);
          console.log("\n(We will use a mock CID to continue the blockchain portion of the demo...)");
@@ -66,9 +66,9 @@ async function main() {
     if (!hasRole) {
         const txGrant = await AccessControl.grantRole(AUTHORITY_ROLE, deployer.address);
         await txGrant.wait();
-        console.log("✅ Role granted!");
+        console.log(" Role granted!");
     } else {
-        console.log("✅ Wallet already has AUTHORITY_ROLE.");
+        console.log(" Wallet already has AUTHORITY_ROLE.");
     }
 
     // 3. Anchor the IPFS CID onto the Sepolia Blockchain
@@ -83,10 +83,10 @@ async function main() {
     console.log(`Tx Hash: ${tx.hash}`);
     
     await tx.wait();
-    console.log(`\n🎉 Demonstration Complete!`);
+    console.log(`\n Demonstration Complete!`);
     console.log(`------------------------------------------`);
-    console.log(`🔗 View Transaction on Etherscan: https://sepolia.etherscan.io/tx/${tx.hash}`);
-    console.log(`📂 View IPFS Data: https://gateway.pinata.cloud/ipfs/${cid}`);
+    console.log(` View Transaction on Etherscan: https://sepolia.etherscan.io/tx/${tx.hash}`);
+    console.log(` View IPFS Data: https://gateway.pinata.cloud/ipfs/${cid}`);
     console.log(`------------------------------------------\n`);
 }
 

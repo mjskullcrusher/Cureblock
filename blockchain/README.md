@@ -31,47 +31,94 @@ PRIVATE_KEY=your_metamask_private_key_here
 
 ## 2. Installation
 
-Open your terminal (PowerShell, Command Prompt, or VS Code Terminal), navigate to this `blockchain` directory, and run:
+Navigate to the `blockchain` directory and install all required smart contract dependencies.
+
+### For Linux & macOS
 ```bash
 npm install
 ```
-This will install Hardhat, OpenZeppelin Contracts, Ethers.js, and all testing utilities.
+
+### For Windows (PowerShell)
+> [!NOTE]
+> By default, Windows PowerShell disables the execution of custom scripts. If you run into an `UnauthorizedAccess` or execution policy error, use one of the following commands:
+> 
+> **Direct CMD Bypass (Simplest):**
+> ```powershell
+> npm.cmd install
+> ```
+> 
+> **Process-level Bypass (Allows standard commands):**
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+> npm install
+> ```
 
 ---
 
 ## 3. Compilation
 
-Compile all Solidity smart contracts into ABI artifacts. This must be done before testing or deploying.
+Compile all Solidity smart contracts to generate the ABI artifacts. This must be done before testing or deploying.
+
+### For Linux & macOS
 ```bash
 npx hardhat compile
 ```
-*If successful, you will see "Compiled 7 Solidity files successfully."*
+
+### For Windows (PowerShell)
+```powershell
+npx.cmd hardhat compile
+# OR (if execution policy was bypassed)
+npx hardhat compile
+```
 
 ---
 
 ## 4. Testing
 
-We have included automated tests to ensure all contracts deploy correctly and access controls function properly.
+Run the automated test suite to verify contract compilation, smart contract deployment, and Access Control assignments.
+
+### For Linux & macOS
 ```bash
 npx hardhat test
 ```
-*Expect to see passing checkmarks for the Deployment suite.*
+
+### For Windows (PowerShell)
+```powershell
+npx.cmd hardhat test
+# OR (if execution policy was bypassed)
+npx hardhat test
+```
 
 ---
 
 ## 5. Local Deployment (Hardhat Network)
 
-To interact with the contracts on a fast, local, simulated blockchain (useful for frontend development without paying gas fees):
+To interact with the contracts on a fast, local, simulated blockchain:
 
-**Step A:** Start the local Hardhat node. Open a terminal and run:
+### Step A: Start the local Hardhat Node
+Run the simulated local blockchain network and leave this terminal running in the background.
+
+**For Linux & macOS:**
 ```bash
 npx hardhat node
 ```
-*(Leave this terminal running. It will give you 20 test accounts with 10000 fake ETH each).*
 
-**Step B:** Open a **second terminal** (keep the first one running), navigate to this directory, and run the deployment script targeting the local network:
+**For Windows (PowerShell):**
+```powershell
+npx.cmd hardhat node
+```
+
+### Step B: Run the Deployment Script
+Open a **second terminal** window, navigate to the `blockchain` directory, and deploy the contracts locally:
+
+**For Linux & macOS:**
 ```bash
 npx hardhat run scripts/deploy.js --network localhost
+```
+
+**For Windows (PowerShell):**
+```powershell
+npx.cmd hardhat run scripts/deploy.js --network localhost
 ```
 
 ---
@@ -80,13 +127,22 @@ npx hardhat run scripts/deploy.js --network localhost
 
 Once you are ready to deploy the contracts to the live Sepolia testnet:
 
-1. Ensure your `.env` file is populated with a valid Sepolia RPC URL (from Alchemy or Infura) and a Private Key.
-2. Ensure the wallet associated with that Private Key has Sepolia test ETH (you can get this from a Sepolia Faucet).
+1. Ensure your `.env` file is populated with a valid Sepolia RPC URL (e.g. from Alchemy or Infura) and your wallet's `PRIVATE_KEY`.
+2. Ensure your wallet has some Sepolia test ETH (obtainable from a Sepolia faucet).
 3. Run the following command:
+
+**For Linux & macOS:**
 ```bash
 npx hardhat run scripts/deploy.js --network sepolia
 ```
-The console will output the live contract addresses for all 7 deployed smart contracts. Save these addresses, as you will need them to connect your frontend/backend.
+
+**For Windows (PowerShell):**
+```powershell
+npx.cmd hardhat run scripts/deploy.js --network sepolia
+```
+
+> [!TIP]
+> The console will output live smart contract addresses for all 7 deployed contracts. Save these addresses, as you will need them to connect your backend/frontend services.
 
 ---
 
@@ -116,8 +172,15 @@ To present a live demonstration of the core architecture to your team, we have i
 1. Ensure your `.env` file is populated with your Sepolia RPC URL, your wallet's Private Key, and your Pinata API keys.
 2. Open your terminal in this `blockchain` directory.
 3. Run the following command:
+
+**For Linux & macOS:**
 ```bash
 npx hardhat run scripts/demo.js --network sepolia
+```
+
+**For Windows (PowerShell):**
+```powershell
+npx.cmd hardhat run scripts/demo.js --network sepolia
 ```
 
 The script will output the live transaction hash and the IPFS gateway link so your team can view the anchored data in real-time!

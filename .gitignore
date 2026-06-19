@@ -15,3 +15,8 @@ blockchain/typechain-types/
 .DS_Store
 .vscode/
 .idea/
+
+# Java / Spring Boot backend
+java-backend/target/
+java-backend/.idea/
+java-backend/*.iml

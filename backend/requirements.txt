@@ -10,3 +10,4 @@ ipfshttpclient
 requests
 web3
 python-dotenv
+cryptography

@@ -13,6 +13,8 @@ contract AccessControlRegistry is AccessControl {
     bytes32 public constant AUTHORITY_ROLE = keccak256("AUTHORITY_ROLE");
     bytes32 public constant RECOVERY_CENTRE_ROLE = keccak256("RECOVERY_CENTRE_ROLE");
 
+    mapping(address => uint256) public authorityExpiry;
+
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
@@ -30,5 +32,24 @@ contract AccessControlRegistry is AccessControl {
     modifier onlyOperator() {
         require(hasRole(OPERATOR_ROLE, msg.sender), "AccessControlRegistry: Must have OPERATOR_ROLE");
         _;
+    }
+
+    /**
+     * @dev Grants the AUTHORITY_ROLE to an account with a strict 24-hour expiration.
+     * Can only be called by a DEFAULT_ADMIN_ROLE.
+     */
+    function grantAuthority(address account) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        authorityExpiry[account] = block.timestamp + 24 hours;
+        _grantRole(AUTHORITY_ROLE, account);
+    }
+
+    /**
+     * @dev Overrides standard hasRole to enforce 24-hour auto-expiration for AUTHORITY_ROLE.
+     */
+    function hasRole(bytes32 role, address account) public view virtual override returns (bool) {
+        if (role == AUTHORITY_ROLE) {
+            return super.hasRole(role, account) && block.timestamp <= authorityExpiry[account];
+        }
+        return super.hasRole(role, account);
     }
 }

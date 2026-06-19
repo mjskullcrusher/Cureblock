@@ -1,5 +1,7 @@
+import hashlib
 import json
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
 from config import RPC_URL, PRIVATE_KEY, IDENTITY_REGISTRY_ADDRESS
@@ -54,8 +56,22 @@ _ensure_operator_role()
 
 
 def hash_biometrics(template: str) -> bytes:
-    """Hashes the raw biometric template using Keccak-256 (EVM standard)."""
-    return w3.keccak(text=template)
+    """
+    Parses the biometric template as a hex-encoded SHA-256 hash if valid,
+    otherwise hashes the raw template using SHA-256.
+    Returns 32 bytes.
+    """
+    clean_input = template.strip()
+    if clean_input.startswith("0x") or clean_input.startswith("0X"):
+        clean_input = clean_input[2:]
+        
+    if len(clean_input) == 64:
+        try:
+            return bytes.fromhex(clean_input)
+        except ValueError:
+            pass
+            
+    return hashlib.sha256(template.encode('utf-8')).digest()
 
 
 def insert_identity_record(did: str, fingerprint_hash: bytes, left_iris_hash: bytes, right_iris_hash: bytes, parent_wallet: str, ipfs_cid: str):
@@ -87,3 +103,25 @@ def insert_identity_record(did: str, fingerprint_hash: bytes, left_iris_hash: by
         raise Exception(f"Transaction failed! Tx: {tx_hash.hex()}")
         
     return tx_hash.hex()
+
+def get_identity_record(did: str) -> dict:
+    """
+    Retrieves the identity record from the blockchain.
+    """
+    record = identity_contract.functions.identities(did).call()
+    
+    # Solidity struct returns a tuple. In web3.py:
+    # (did, fingerprintHash, leftIrisHash, rightIrisHash, parentWallet, ipfsCID, isActive)
+    
+    if not record[6]: # isActive
+        return None
+        
+    return {
+        "did": record[0],
+        "fingerprintHash": record[1].hex(),
+        "leftIrisHash": record[2].hex(),
+        "rightIrisHash": record[3].hex(),
+        "parentWallet": record[4],
+        "ipfsCID": record[5],
+        "isActive": record[6]
+    }

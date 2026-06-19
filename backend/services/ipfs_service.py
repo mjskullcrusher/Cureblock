@@ -28,3 +28,16 @@ def upload_dict_to_ipfs(data: dict, filename: str = "child_registration.json") -
         return response.json().get("IpfsHash")
     else:
         raise Exception(f"Failed to upload to Pinata: {response.text}")
+
+def fetch_dict_from_ipfs(cid: str) -> dict:
+    """
+    Retrieves a JSON object from IPFS via Pinata's public gateway.
+    """
+    url = f"https://gateway.pinata.cloud/ipfs/{cid}"
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Failed to fetch from IPFS (CID: {cid}): {response.text}")

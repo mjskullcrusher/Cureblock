@@ -1,4 +1,5 @@
 import os
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -10,6 +11,7 @@ RPC_URL = os.getenv("RPC_URL")
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 PINATA_API_KEY = os.getenv("PINATA_API_KEY")
 PINATA_SECRET = os.getenv("PINATA_SECRET")
+AES_ENCRYPTION_KEY = os.getenv("AES_ENCRYPTION_KEY")
 
 # This will be updated once the contract redeploys
 IDENTITY_REGISTRY_ADDRESS = "0x2c4b62B2e42472d96657997D876E434153B5b966"

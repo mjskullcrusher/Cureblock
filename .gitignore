@@ -20,3 +20,12 @@ blockchain/typechain-types/
 java-backend/target/
 java-backend/.idea/
 java-backend/*.iml
+
+# Flutter app
+flutter-app/build/
+flutter-app/.dart_tool/
+flutter-app/.idea/
+flutter-app/ios/Pods/
+flutter-app/ios/.symlinks/
+flutter-app/macos/Pods/
+flutter-app/**/*.iml

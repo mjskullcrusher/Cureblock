@@ -60,7 +60,8 @@ def register_child(data: ChildRegistrationSchema):
             left_iris_hash=li_hash,
             right_iris_hash=ri_hash,
             parent_wallet=data.parentWallet,
-            ipfs_cid=ipfs_cid
+            ipfs_cid=ipfs_cid,
+            biometric_image_cid=""
         )
         
         return RegistrationResponse(

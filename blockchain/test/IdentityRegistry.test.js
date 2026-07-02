@@ -83,6 +83,7 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
     const leftIrisHash = hre.ethers.keccak256(hre.ethers.toUtf8Bytes("left_iris_hash_123"));
     const rightIrisHash = hre.ethers.keccak256(hre.ethers.toUtf8Bytes("right_iris_hash_123"));
     const ipfsCID = "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco";
+    const biometricImageCID = "QmBiometricFaceImageCID123456789";
 
     it("Should allow operator to register child identity", async function () {
       await expect(identityRegistry.connect(operator).registerIdentity(
@@ -91,7 +92,8 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
         leftIrisHash,
         rightIrisHash,
         parent.address,
-        ipfsCID
+        ipfsCID,
+        biometricImageCID
       ))
       .to.emit(identityRegistry, "IdentityRegistered")
       .withArgs(did, parent.address);
@@ -104,6 +106,7 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
       expect(record.rightIrisHash).to.equal(rightIrisHash);
       expect(record.parentWallet).to.equal(parent.address);
       expect(record.ipfsCID).to.equal(ipfsCID);
+      expect(record.biometricImageCID).to.equal(biometricImageCID);
       expect(record.isActive).to.be.true;
     });
 
@@ -114,7 +117,8 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
         leftIrisHash,
         rightIrisHash,
         parent.address,
-        ipfsCID
+        ipfsCID,
+        biometricImageCID
       )).to.be.revertedWith("IdentityRegistry: Must have OPERATOR_ROLE");
     });
 
@@ -126,7 +130,8 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
         leftIrisHash,
         rightIrisHash,
         parent.address,
-        ipfsCID
+        ipfsCID,
+        biometricImageCID
       );
 
       // Second registration of same DID should revert
@@ -136,7 +141,8 @@ describe("Cureblock Identity Registry & Access Control Tests", function () {
         leftIrisHash,
         rightIrisHash,
         parent.address,
-        ipfsCID
+        ipfsCID,
+        biometricImageCID
       )).to.be.revertedWith("IdentityRegistry: Identity already exists");
     });
   });

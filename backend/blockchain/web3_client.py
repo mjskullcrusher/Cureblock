@@ -1,5 +1,6 @@
 import hashlib
 import json
+import warnings
 from pathlib import Path
 # pyrefly: ignore [missing-import]
 from web3 import Web3
@@ -17,6 +18,20 @@ if not w3.is_connected():
 # Load Account
 account = w3.eth.account.from_key(PRIVATE_KEY)
 
+# ---------------------------------------------------------------------------
+# Auto-load contract address from deployments.json (written by deploy.js).
+# Falls back to the hardcoded value in config.py if the file is missing.
+# ---------------------------------------------------------------------------
+_deployments_path = Path(__file__).parent.parent.parent / "blockchain" / "deployments.json"
+if _deployments_path.exists():
+    with open(_deployments_path, "r") as _f:
+        _deps = json.load(_f)
+    _identity_address = _deps.get("IdentityRegistry", IDENTITY_REGISTRY_ADDRESS)
+    print(f"[web3_client] Loaded IdentityRegistry address from deployments.json: {_identity_address}")
+else:
+    _identity_address = IDENTITY_REGISTRY_ADDRESS
+    print(f"[web3_client] deployments.json not found — using hardcoded address: {_identity_address}")
+
 # Load ABI dynamically from the Hardhat artifacts
 artifacts_path = Path(__file__).parent.parent.parent / "blockchain" / "artifacts" / "contracts" / "IdentityRegistry.sol" / "IdentityRegistry.json"
 with open(artifacts_path, "r") as f:
@@ -28,16 +43,16 @@ access_artifacts_path = Path(__file__).parent.parent.parent / "blockchain" / "ar
 with open(access_artifacts_path, "r") as f:
     access_abi = json.load(f)["abi"]
 
-identity_contract = w3.eth.contract(address=IDENTITY_REGISTRY_ADDRESS, abi=IDENTITY_ABI)
+identity_contract = w3.eth.contract(address=_identity_address, abi=IDENTITY_ABI)
 
 def _ensure_operator_role():
     """Ensure the backend wallet has the OPERATOR_ROLE required for insertion."""
     access_address = identity_contract.functions.accessControl().call()
     access_contract = w3.eth.contract(address=access_address, abi=access_abi)
-    
+
     operator_role = w3.keccak(text="OPERATOR_ROLE")
     has_role = access_contract.functions.hasRole(operator_role, account.address).call()
-    
+
     if not has_role:
         print("Granting OPERATOR_ROLE to backend wallet for the first time...")
         tx = access_contract.functions.grantRole(operator_role, account.address).build_transaction({
@@ -50,9 +65,19 @@ def _ensure_operator_role():
         tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
         w3.eth.wait_for_transaction_receipt(tx_hash)
         print(f"OPERATOR_ROLE granted! Tx: {tx_hash.hex()}")
+    else:
+        print("[web3_client] Backend wallet already has OPERATOR_ROLE.")
 
-# Run role check on startup
-_ensure_operator_role()
+# Run role check on startup — wrapped so a bad address is a warning, not a crash.
+try:
+    _ensure_operator_role()
+except Exception as _e:
+    warnings.warn(
+        f"[web3_client] Startup role-check failed: {_e}\n"
+        "The server will start, but blockchain writes may fail until contracts are redeployed "
+        "and the address in deployments.json (or config.py) is updated.",
+        stacklevel=1,
+    )
 
 
 def hash_biometrics(template: str) -> bytes:
@@ -74,7 +99,7 @@ def hash_biometrics(template: str) -> bytes:
     return hashlib.sha256(template.encode('utf-8')).digest()
 
 
-def insert_identity_record(did: str, fingerprint_hash: bytes, left_iris_hash: bytes, right_iris_hash: bytes, parent_wallet: str, ipfs_cid: str):
+def insert_identity_record(did: str, fingerprint_hash: bytes, left_iris_hash: bytes, right_iris_hash: bytes, parent_wallet: str, ipfs_cid: str, biometric_image_cid: str):
     """
     Submits the transaction to IdentityRegistry.sol to insert the record.
     Returns the transaction hash.
@@ -85,7 +110,8 @@ def insert_identity_record(did: str, fingerprint_hash: bytes, left_iris_hash: by
         left_iris_hash,
         right_iris_hash,
         w3.to_checksum_address(parent_wallet),
-        ipfs_cid
+        ipfs_cid,
+        biometric_image_cid
     ).build_transaction({
         "from": account.address,
         "nonce": w3.eth.get_transaction_count(account.address),
@@ -111,9 +137,9 @@ def get_identity_record(did: str) -> dict:
     record = identity_contract.functions.identities(did).call()
     
     # Solidity struct returns a tuple. In web3.py:
-    # (did, fingerprintHash, leftIrisHash, rightIrisHash, parentWallet, ipfsCID, isActive)
+    # (did, fingerprintHash, leftIrisHash, rightIrisHash, parentWallet, ipfsCID, biometricImageCID, isActive)
     
-    if not record[6]: # isActive
+    if not record[7]: # isActive
         return None
         
     return {
@@ -123,5 +149,6 @@ def get_identity_record(did: str) -> dict:
         "rightIrisHash": record[3].hex(),
         "parentWallet": record[4],
         "ipfsCID": record[5],
-        "isActive": record[6]
+        "biometricImageCID": record[6],
+        "isActive": record[7]
     }

@@ -17,6 +17,7 @@ contract IdentityRegistry {
         bytes32 rightIrisHash;
         address parentWallet;
         string ipfsCID;
+        string biometricImageCID;
         bool isActive;
     }
 
@@ -35,7 +36,8 @@ contract IdentityRegistry {
         bytes32 _leftIrisHash,
         bytes32 _rightIrisHash,
         address _parentWallet,
-        string memory _ipfsCID
+        string memory _ipfsCID,
+        string memory _biometricImageCID
     ) external {
         require(accessControl.hasRole(accessControl.OPERATOR_ROLE(), msg.sender), "IdentityRegistry: Must have OPERATOR_ROLE");
         require(!identities[_did].isActive, "IdentityRegistry: Identity already exists");
@@ -47,6 +49,7 @@ contract IdentityRegistry {
             rightIrisHash: _rightIrisHash,
             parentWallet: _parentWallet,
             ipfsCID: _ipfsCID,
+            biometricImageCID: _biometricImageCID,
             isActive: true
         });
 
